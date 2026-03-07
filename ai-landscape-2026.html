@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 全景速览 — 2026.03.07</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: system-ui, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(160deg, #0a0a1a 0%, #1a1a3e 100%);
+    color: #e0e0e0;
+    min-height: 100vh;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  code, .mono { font-family: "SF Mono", "Fira Code", "Cascadia Code", Consolas, monospace; }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px 40px;
+  }
+
+  /* ===== Header ===== */
+  .header {
+    text-align: center;
+    padding: 48px 16px 40px;
+  }
+  .header h1 {
+    font-size: 2.2rem;
+    background: linear-gradient(90deg, #00d4ff, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.02em;
+    margin-bottom: 12px;
+  }
+  .header .subtitle {
+    font-size: 1rem;
+    color: #94a3b8;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  /* ===== Grid ===== */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  @media (min-width: 768px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .grid .card.full-width { grid-column: 1 / -1; }
+    .header h1 { font-size: 2.8rem; }
+  }
+
+  /* ===== Card ===== */
+  .card {
+    background: rgba(15, 15, 35, 0.75);
+    border: 1px solid rgba(0, 212, 255, 0.15);
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.04), inset 0 0 60px rgba(0, 0, 0, 0.15);
+    transition: border-color 0.3s;
+  }
+  .card:hover { border-color: rgba(0, 212, 255, 0.35); }
+
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #00d4ff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .emoji { font-size: 1.4rem; }
+
+  /* ===== Tables ===== */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    white-space: nowrap;
+  }
+  th {
+    text-align: left;
+    padding: 8px 12px;
+    background: rgba(0, 212, 255, 0.08);
+    color: #00d4ff;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+  }
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  tr:last-child td { border-bottom: none; }
+
+  /* ===== Stacked table for mobile ===== */
+  @media (max-width: 600px) {
+    table.stackable thead { display: none; }
+    table.stackable tr {
+      display: block;
+      margin-bottom: 12px;
+      border: 1px solid rgba(0, 212, 255, 0.1);
+      border-radius: 8px;
+      padding: 8px 0;
+    }
+    table.stackable td {
+      display: block;
+      padding: 4px 12px;
+      border-bottom: none;
+      white-space: normal;
+    }
+    table.stackable td::before {
+      content: attr(data-label);
+      font-weight: 600;
+      color: #00d4ff;
+      display: inline-block;
+      min-width: 80px;
+      margin-right: 8px;
+      font-size: 0.8rem;
+    }
+  }
+
+  /* ===== Tags / Badges ===== */
+  .trend-tag {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .trend-tag.blue   { background: rgba(0, 212, 255, 0.12); color: #00d4ff; border: 1px solid rgba(0, 212, 255, 0.25); }
+  .trend-tag.purple { background: rgba(168, 85, 247, 0.12); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.25); }
+  .trend-tag.green  { background: rgba(34, 197, 94, 0.12); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.25); }
+  .trend-tag.orange { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.25); }
+
+  /* ===== Sub-section ===== */
+  .sub-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #a855f7;
+    margin: 16px 0 8px;
+  }
+  .sub-title:first-of-type { margin-top: 0; }
+
+  /* ===== Lists ===== */
+  .item-list { list-style: none; padding: 0; }
+  .item-list li {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: 0.9rem;
+  }
+  .item-list li:last-child { border-bottom: none; }
+  .item-list .name {
+    color: #00d4ff;
+    font-weight: 600;
+  }
+
+  /* ===== Trend list (板块七) ===== */
+  .trend-list { list-style: none; padding: 0; counter-reset: trend; }
+  .trend-list li {
+    counter-increment: trend;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+  .trend-list li:last-child { border-bottom: none; }
+  .trend-list li::before {
+    content: counter(trend);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(0, 212, 255, 0.15);
+    color: #00d4ff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+  .trend-list .hl {
+    color: #f59e0b;
+    font-weight: 700;
+  }
+
+  /* ===== Inline tags ===== */
+  .inline-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .inline-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    background: rgba(168, 85, 247, 0.1);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    color: #c4b5fd;
+  }
+
+  /* ===== Footer ===== */
+  .footer {
+    margin-top: 32px;
+    padding: 24px;
+    text-align: center;
+    font-size: 0.8rem;
+    color: #64748b;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    line-height: 1.8;
+  }
+  .footer a {
+    color: #00d4ff;
+    text-decoration: none;
+  }
+  .footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <h1>🌍 AI 全景速览 — 2026.03.07</h1>
+  <p class="subtitle">从大模型到具身 AI，一页掌握全球 AI 最新动态</p>
+</header>
+
+<div class="container">
+<div class="grid">
+
+  <!-- 板块一：前沿大模型 -->
+  <div class="card full-width">
+    <div class="card-title"><span class="emoji">🧠</span> 前沿大模型</div>
+    <div class="table-wrap">
+      <table class="stackable">
+        <thead>
+          <tr><th>模型</th><th>最新版本</th><th>亮点</th><th>最佳用途</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-label="模型">GPT-5 系列 <span class="mono" style="color:#64748b;font-size:.78rem">(OpenAI)</span></td>
+            <td data-label="版本">GPT-5.4 (2026.3)</td>
+            <td data-label="亮点">400K 上下文，幻觉降低 65%，速度 3.8×，AIME 满分</td>
+            <td data-label="用途">推理、复杂问答</td>
+          </tr>
+          <tr>
+            <td data-label="模型">Claude <span class="mono" style="color:#64748b;font-size:.78rem">(Anthropic)</span></td>
+            <td data-label="版本">Opus 4.6 / Sonnet 4.6 (2026.2)</td>
+            <td data-label="亮点">SWE-bench 80.9%，200K-1M 上下文，Agent Teams</td>
+            <td data-label="用途">代码、企业</td>
+          </tr>
+          <tr>
+            <td data-label="模型">Gemini <span class="mono" style="color:#64748b;font-size:.78rem">(Google)</span></td>
+            <td data-label="版本">3.1 Pro (2026.2)</td>
+            <td data-label="亮点">1M token 上下文（最大），Deep Think，MMLU 93.8%</td>
+            <td data-label="用途">长文档、多模态</td>
+          </tr>
+          <tr>
+            <td data-label="模型">DeepSeek V3.2 <span class="mono" style="color:#64748b;font-size:.78rem">(开源)</span></td>
+            <td data-label="版本">2026.Q1</td>
+            <td data-label="亮点">1M+ 上下文，成本极低，开放权重</td>
+            <td data-label="用途">高性价比部署</td>
+          </tr>
+          <tr>
+            <td data-label="模型">Kimi K2 <span class="mono" style="color:#64748b;font-size:.78rem">(月之暗面)</span></td>
+            <td data-label="版本">2026.Q1</td>
+            <td data-label="亮点">万亿参数开放权重，Chatbot Arena 第一</td>
+            <td data-label="用途">中文生态</td>
+          </tr>
+          <tr>
+            <td data-label="模型">GLM-5 <span class="mono" style="color:#64748b;font-size:.78rem">(智谱)</span></td>
+            <td data-label="版本">2026.Q1</td>
+            <td data-label="亮点">首个华为芯片训练的前沿模型</td>
+            <td data-label="用途">国产化部署</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <span class="trend-tag blue">📉 API 价格一年暴跌 50-98%，多模型路由成为标配</span>
+  </div>
+
+  <!-- 板块二：AI Agent 智能体 -->
+  <div class="card">
+    <div class="card-title"><span class="emoji">🤖</span> AI Agent 智能体</div>
+
+    <div class="sub-title">⌨️ 编码智能体</div>
+    <ul class="item-list">
+      <li><span class="name">GitHub Copilot</span> (Agent Mode) — 深度集成 GitHub，全仓库上下文</li>
+      <li><span class="name">Claude Code</span> — 端到端自主编码，业界最强代码质量</li>
+      <li><span class="name">Cursor</span> — IDE 级全仓库理解，自然语言→代码</li>
+      <li><span class="name">Devin</span> — 全自主软件工程师</li>
+      <li><span class="name">Amazon Q Developer</span> — AWS 集成，遗留代码现代化</li>
+    </ul>
+
+    <div class="sub-title">🏢 通用/业务智能体平台</div>
+    <ul class="item-list">
+      <li><span class="name">LangChain / LangGraph</span> — 开发者首选 Agent 框架</li>
+      <li><span class="name">CrewAI</span> — 多 Agent 协作编排</li>
+      <li><span class="name">n8n</span> (AI Agent 节点) — 无代码 AI 自动化</li>
+      <li><span class="name">Zapier AI</span> — 连接 5000+ 应用</li>
+      <li><span class="name">Adaptive / Lindy / Relevance AI</span> — 无代码 Agent 构建器</li>
+    </ul>
+
+    <span class="trend-tag purple">🚀 Agent 从"辅助"进化到"执行"</span>
+  </div>
+
+  <!-- 板块三：内容生成 -->
+  <div class="card">
+    <div class="card-title"><span class="emoji">🎨</span> 内容生成</div>
+
+    <div class="sub-title">🎬 视频生成</div>
+    <div class="table-wrap">
+      <table class="stackable">
+        <thead>
+          <tr><th>工具</th><th>亮点</th><th>价格</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-label="工具">Sora 2</td>
+            <td data-label="亮点">电影级叙事，物理仿真，同步音频</td>
+            <td data-label="价格">$20-200/月</td>
+          </tr>
+          <tr>
+            <td data-label="工具">Veo 3.1</td>
+            <td data-label="亮点">4K 专业视频，原生音频口型同步</td>
+            <td data-label="价格">$19.99/月</td>
+          </tr>
+          <tr>
+            <td data-label="工具">Runway Gen-4.5</td>
+            <td data-label="亮点">Motion Brush 精确控制</td>
+            <td data-label="价格">$12-78/月</td>
+          </tr>
+          <tr>
+            <td data-label="工具">Kling 2.6</td>
+            <td data-label="亮点">1080p 两分钟，人体运动最逼真</td>
+            <td data-label="价格">免费+付费</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-title">🖼️ 图像生成</div>
+    <div class="inline-tags">
+      <span class="inline-tag">Midjourney（艺术王者）</span>
+      <span class="inline-tag">DALL-E 4</span>
+      <span class="inline-tag">Adobe Firefly</span>
+      <span class="inline-tag">SD XL</span>
+    </div>
+
+    <div class="sub-title">🎵 音乐生成</div>
+    <ul class="item-list">
+      <li><span class="name">Suno v3</span> — 完整歌曲</li>
+      <li><span class="name">Udio</span> — 分轨编辑 + Remix</li>
+      <li><span class="name">ElevenLabs</span></li>
+    </ul>
+  </div>
+
+  <!-- 板块四：生产力工具矩阵 -->
+  <div class="card full-width">
+    <div class="card-title"><span class="emoji">⚡</span> 生产力工具矩阵</div>
+    <div class="table-wrap">
+      <table class="stackable">
+        <thead>
+          <tr><th>场景</th><th>推荐工具</th></tr>
+        </thead>
+        <tbody>
+          <tr><td data-label="场景">AI 助手</td><td data-label="推荐工具">ChatGPT、Microsoft Copilot、Gemini</td></tr>
+          <tr><td data-label="场景">会议沟通</td><td data-label="推荐工具">Fathom、Fireflies.ai、Granola</td></tr>
+          <tr><td data-label="场景">写作内容</td><td data-label="推荐工具">Notion AI、Jasper、Grammarly AI</td></tr>
+          <tr><td data-label="场景">研究知识</td><td data-label="推荐工具">NotebookLM、Perplexity、Elicit</td></tr>
+          <tr><td data-label="场景">演示可视化</td><td data-label="推荐工具">Gamma、Canva AI、Beautiful.ai</td></tr>
+          <tr><td data-label="场景">日程任务</td><td data-label="推荐工具">Motion、Reclaim.ai、ClickUp AI</td></tr>
+          <tr><td data-label="场景">邮件管理</td><td data-label="推荐工具">Superhuman、Shortwave</td></tr>
+          <tr><td data-label="场景">应用开发</td><td data-label="推荐工具">Lovable、Bolt、v0</td></tr>
+          <tr><td data-label="场景">自动化</td><td data-label="推荐工具">Zapier AI、n8n、Make</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 板块五：具身 AI & 机器人 -->
+  <div class="card">
+    <div class="card-title"><span class="emoji">🦾</span> 具身 AI &amp; 机器人</div>
+    <ul class="item-list">
+      <li><span class="name">Boston Dynamics Atlas 3.0</span> — 已在工厂实际部署</li>
+      <li><span class="name">Tesla Optimus / Figure AI / AgiBot</span> — 人形机器人进入量产</li>
+      <li><span class="name">NVIDIA Cosmos &amp; Isaac GR00T</span> — 开放物理 AI 模型</li>
+      <li><span class="name">LG CLOiD</span> — 家庭服务机器人，可端餐做家务</li>
+    </ul>
+    <span class="trend-tag green">🔗 通用"机器人大脑"基础模型将硬件与智能解耦</span>
+  </div>
+
+  <!-- 板块六：全球 AI 监管 -->
+  <div class="card">
+    <div class="card-title"><span class="emoji">⚖️</span> 全球 AI 监管</div>
+    <div class="table-wrap">
+      <table class="stackable">
+        <thead>
+          <tr><th>地区</th><th>状态</th></tr>
+        </thead>
+        <tbody>
+          <tr><td data-label="地区">🇪🇺 欧盟</td><td data-label="状态">EU AI Act 执行中，2026.8 主要截止日期，罚款最高营收 7%</td></tr>
+          <tr><td data-label="地区">🇺🇸 美国</td><td data-label="状态">无联邦统一法，科罗拉多 2026.6 生效，加州框架领先</td></tr>
+          <tr><td data-label="地区">🇨🇳 中国</td><td data-label="状态">算法透明、内容标注、芯片管控</td></tr>
+          <tr><td data-label="地区">🇬🇧 英国</td><td data-label="状态">亲创新，依托现有监管机构 + AI 安全研究所</td></tr>
+          <tr><td data-label="地区">🇯🇵🇰🇷 日韩</td><td data-label="状态">灵活促进型框架，研发+安全并重</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <span class="trend-tag orange">⚠️ 2026 被称为"AI 执法元年"</span>
+  </div>
+
+  <!-- 板块七：核心趋势 -->
+  <div class="card full-width">
+    <div class="card-title"><span class="emoji">🔮</span> 核心趋势</div>
+    <ol class="trend-list">
+      <li>没有最好的模型，只有最适合任务的模型 — <span class="hl">多模型路由成标配</span></li>
+      <li>Agent 是主角 — <span class="hl">从聊天机器人到自主执行工作流</span></li>
+      <li>成本悬崖式下降 — <span class="hl">API 价格一年降 50-98%</span></li>
+      <li>多模态融合 — <span class="hl">文本+图像+视频+音频+代码统一处理</span></li>
+      <li>开源追赶闭源 — <span class="hl">DeepSeek、Kimi K2、GLM-5 挑战商业模型</span></li>
+      <li>具身 AI 元年 — <span class="hl">人形机器人从 demo 走向工厂和家庭</span></li>
+      <li>监管收紧 — <span class="hl">全球进入实质执法阶段</span></li>
+      <li>AI 原生应用爆发 — <span class="hl">自然语言即编程</span></li>
+    </ol>
+  </div>
+
+</div><!-- .grid -->
+
+<!-- Footer -->
+<footer class="footer">
+  信息来源：OpenAI / Anthropic / Google / NVIDIA 官方，Deloitte / Stanford / IFR 报告，PCMag / TechRadar 测评，arXiv / Chatbot Arena 数据<br>
+  制作日期：2026-03-07 &nbsp;·&nbsp; GitHub: <a href="https://github.com/charlesbo/ai_now" target="_blank" rel="noopener">charlesbo/ai_now</a>
+</footer>
+
+</div><!-- .container -->
+</body>
+</html>
