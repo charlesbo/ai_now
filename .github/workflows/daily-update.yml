@@ -1,0 +1,83 @@
+name: Daily AI Landscape Update
+
+on:
+  schedule:
+    # 每天 UTC 00:00 (北京时间 08:00) 运行
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 支持手动触发
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  create-update-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get today's date
+        id: date
+        run: echo "today=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Check for existing open update issue
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          count=$(gh issue list \
+            --repo "${{ github.repository }}" \
+            --label "daily-update" \
+            --state open \
+            --json number \
+            --jq 'length')
+          echo "open_issues=$count" >> "$GITHUB_OUTPUT"
+
+      - name: Create update issue for Copilot
+        if: steps.check.outputs.open_issues == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TODAY: ${{ steps.date.outputs.today }}
+        run: |
+          gh issue create \
+            --repo "${{ github.repository }}" \
+            --title "🔄 Daily AI Landscape Update — $TODAY" \
+            --label "daily-update" \
+            --assignee "copilot" \
+            --body "## 任务
+
+          请更新 \`index.html\` 中的 AI 全景速览海报，日期更新为 **$TODAY**。
+
+          ## 更新步骤
+
+          1. **使用 web search 搜索以下领域的最新动态**（搜索日期范围：过去 48 小时）：
+             - \`latest AI model releases 2026\` — 大模型新版本、性能突破
+             - \`AI agent tools news 2026\` — Agent 智能体新产品/重大更新
+             - \`AI video image generation news 2026\` — 内容生成工具
+             - \`AI productivity tools 2026\` — 生产力工具
+             - \`humanoid robot AI embodied 2026\` — 具身 AI / 机器人
+             - \`AI regulation policy 2026\` — 全球 AI 监管动态
+             - \`中国 AI 大模型 最新发布\` — 国内 AI 动态
+
+          2. **根据搜索结果更新 \`index.html\` 中对应板块**：
+             - 有新模型发布 → 更新板块一的表格
+             - 有新 Agent 工具 → 更新板块二
+             - 内容生成工具有更新 → 更新板块三
+             - 生产力工具有变化 → 更新板块四
+             - 机器人领域有新闻 → 更新板块五
+             - 监管政策有变化 → 更新板块六
+             - 根据整体趋势 → 更新板块七的核心趋势
+
+          3. **必须更新的内容**：
+             - 标题区日期：\`🌍 AI 全景速览 — $TODAY\`（使用 YYYY.MM.DD 格式）
+             - 底部制作日期：\`$TODAY\`
+
+          4. **保持不变**：
+             - 整体视觉设计和 CSS 样式
+             - 页面结构和板块数量
+             - 响应式布局逻辑
+
+          ## 重要提醒
+          - 如果某个板块没有新信息，保持原有内容不变
+          - 数据必须准确，注明来源
+          - 保持每条信息简洁（一句话）
+          - 参考 \`.github/copilot-instructions.md\` 中的完整规范
+          "
