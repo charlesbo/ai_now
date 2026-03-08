@@ -14,15 +14,15 @@ jobs:
   create-update-issue:
     runs-on: ubuntu-latest
     steps:
-      - name: Create issue and assign to Copilot
+      # Step 1: Create issue using built-in GITHUB_TOKEN (always works)
+      - name: Create update issue
+        id: create
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.COPILOT_PAT }}
           script: |
             const today = new Date().toISOString().split('T')[0];
             const todayDot = today.replace(/-/g, '.');
 
-            // Check for existing open update issues
             const existing = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -31,48 +31,48 @@ jobs:
             });
             if (existing.data.length > 0) {
               console.log(`Skipping: ${existing.data.length} open update issue(s) already exist`);
+              core.setOutput('created', 'false');
               return;
             }
 
-            // Create the issue
-            const body = `## 任务
-
-            请更新 \`index.html\` 中的 AI 全景速览海报，日期更新为 **${today}**。
-
-            ## 更新步骤
-
-            1. **使用 web search 搜索以下领域的最新动态**（搜索日期范围：过去 48 小时）：
-               - \`latest AI model releases 2026\` — 大模型新版本、性能突破
-               - \`AI agent tools news 2026\` — Agent 智能体新产品/重大更新
-               - \`AI video image generation news 2026\` — 内容生成工具
-               - \`AI productivity tools 2026\` — 生产力工具
-               - \`humanoid robot AI embodied 2026\` — 具身 AI / 机器人
-               - \`AI regulation policy 2026\` — 全球 AI 监管动态
-               - \`中国 AI 大模型 最新发布\` — 国内 AI 动态
-
-            2. **根据搜索结果更新 \`index.html\` 中对应板块**：
-               - 有新模型发布 → 更新板块一的表格
-               - 有新 Agent 工具 → 更新板块二
-               - 内容生成工具有更新 → 更新板块三
-               - 生产力工具有变化 → 更新板块四
-               - 机器人领域有新闻 → 更新板块五
-               - 监管政策有变化 → 更新板块六
-               - 根据整体趋势 → 更新板块七的核心趋势
-
-            3. **必须更新的内容**：
-               - 标题区日期：\`🌍 AI 全景速览 — ${todayDot}\`
-               - 底部制作日期：\`${today}\`
-
-            4. **保持不变**：
-               - 整体视觉设计和 CSS 样式
-               - 页面结构和板块数量
-               - 响应式布局逻辑
-
-            ## 重要提醒
-            - 如果某个板块没有新信息，保持原有内容不变
-            - 数据必须准确，注明来源
-            - 保持每条信息简洁（一句话）
-            - 参考 \`.github/copilot-instructions.md\` 中的完整规范`;
+            const body = [
+              `## 任务`,
+              `请更新 \`index.html\` 中的 AI 全景速览海报，日期更新为 **${today}**。`,
+              ``,
+              `## 更新步骤`,
+              `1. **使用 web search 搜索以下领域的最新动态**（搜索日期范围：过去 48 小时）：`,
+              `   - \`latest AI model releases 2026\` — 大模型新版本、性能突破`,
+              `   - \`AI agent tools news 2026\` — Agent 智能体新产品/重大更新`,
+              `   - \`AI video image generation news 2026\` — 内容生成工具`,
+              `   - \`AI productivity tools 2026\` — 生产力工具`,
+              `   - \`humanoid robot AI embodied 2026\` — 具身 AI / 机器人`,
+              `   - \`AI regulation policy 2026\` — 全球 AI 监管动态`,
+              `   - \`中国 AI 大模型 最新发布\` — 国内 AI 动态`,
+              ``,
+              `2. **根据搜索结果更新 \`index.html\` 中对应板块**：`,
+              `   - 有新模型发布 → 更新板块一的表格`,
+              `   - 有新 Agent 工具 → 更新板块二`,
+              `   - 内容生成工具有更新 → 更新板块三`,
+              `   - 生产力工具有变化 → 更新板块四`,
+              `   - 机器人领域有新闻 → 更新板块五`,
+              `   - 监管政策有变化 → 更新板块六`,
+              `   - 根据整体趋势 → 更新板块七的核心趋势`,
+              ``,
+              `3. **必须更新的内容**：`,
+              `   - 标题区日期：\`🌍 AI 全景速览 — ${todayDot}\``,
+              `   - 底部制作日期：\`${today}\``,
+              ``,
+              `4. **保持不变**：`,
+              `   - 整体视觉设计和 CSS 样式`,
+              `   - 页面结构和板块数量`,
+              `   - 响应式布局逻辑`,
+              ``,
+              `## 重要提醒`,
+              `- 如果某个板块没有新信息，保持原有内容不变`,
+              `- 数据必须准确，注明来源`,
+              `- 保持每条信息简洁（一句话）`,
+              `- 参考 \`.github/copilot-instructions.md\` 中的完整规范`,
+            ].join('\n');
 
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
@@ -81,30 +81,29 @@ jobs:
               body: body,
               labels: ['daily-update']
             });
-            console.log(`Created issue #${issue.data.number}`);
 
-            // Assign Copilot via GraphQL (bot accounts can't be assigned via REST)
-            try {
-              await github.graphql(`
-                mutation($issueId: ID!) {
-                  addAssigneesToAssignable(input: {
-                    assignableId: $issueId,
-                    assigneeIds: ["copilot"]
-                  }) {
-                    assignable { ... on Issue { number } }
-                  }
-                }
-              `, { issueId: issue.data.node_id });
-              console.log('Assigned Copilot via GraphQL (login)');
-            } catch (e1) {
-              console.log(`GraphQL login attempt failed: ${e1.message}`);
-              // Fallback: look up the bot node ID, then assign
+            console.log(`Created issue #${issue.data.number}`);
+            core.setOutput('created', 'true');
+            core.setOutput('issue_number', issue.data.number);
+            core.setOutput('issue_node_id', issue.data.node_id);
+
+      # Step 2: Assign Copilot using PAT (separate step, won't block issue creation)
+      - name: Assign Copilot to issue
+        if: steps.create.outputs.created == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.COPILOT_PAT || secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNodeId = '${{ steps.create.outputs.issue_node_id }}';
+            const issueNumber = ${{ steps.create.outputs.issue_number || 0 }};
+
+            // Try multiple approaches to assign Copilot
+            const attempts = [
+              { name: 'copilot login', assigneeIds: ['copilot'] },
+            ];
+
+            for (const attempt of attempts) {
               try {
-                const lookup = await github.graphql(`
-                  query {
-                    user(login: "github-copilot[bot]") { id }
-                  }
-                `);
                 await github.graphql(`
                   mutation($issueId: ID!, $ids: [ID!]!) {
                     addAssigneesToAssignable(input: {
@@ -114,16 +113,20 @@ jobs:
                       assignable { ... on Issue { number } }
                     }
                   }
-                `, { issueId: issue.data.node_id, ids: [lookup.user.id] });
-                console.log('Assigned Copilot via GraphQL (bot node ID)');
-              } catch (e2) {
-                console.log(`Bot lookup failed: ${e2.message}, adding @copilot comment`);
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issue.data.number,
-                  body: '@copilot Please work on this issue following the instructions above.'
-                });
-                console.log('Added @copilot mention as fallback');
+                `, { issueId: issueNodeId, ids: attempt.assigneeIds });
+                console.log(`✅ Assigned Copilot via: ${attempt.name}`);
+                return;
+              } catch (e) {
+                console.log(`❌ ${attempt.name} failed: ${e.message}`);
               }
             }
+
+            // Final fallback: @copilot comment
+            console.log('All GraphQL attempts failed, adding @copilot comment...');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: '@copilot Please work on this issue following the instructions above.'
+            });
+            console.log('✅ Added @copilot mention as fallback');
